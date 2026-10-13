@@ -1,0 +1,79 @@
+#!/bin/sh
+# Live init: find the ISO, mount squashfs + RAM overlay, switch_root.
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mkdir -p /dev/pts /run /newroot
+mount -t devpts devpts /dev/pts
+mount -t tmpfs -o mode=755 tmpfs /run
+
+if [ -x /bin/busybox ]; then
+	/bin/busybox --install -s 2>/dev/null
+fi
+
+log() {
+	echo "live: $*"
+	echo "live: $*" >/dev/kmsg 2>/dev/null
+}
+
+try_mod() {
+	modprobe "$1" 2>/dev/null || true
+}
+
+for m in loop squashfs overlay isofs iso9660 vfat nls_cp437 nls_iso8859-1 \
+	usb-storage sd_mod sr_mod ahci nvme virtio_pci virtio_blk virtio_scsi \
+	xhci-pci ehci-pci uhci-hcd ohci-hcd hid-generic usbhid ext4; do
+	try_mod "$m"
+done
+
+mkdir -p /run/live/iso /run/live/lower /run/live/rw
+found=0
+i=0
+while [ "$i" -lt 25 ]; do
+	mdev -s 2>/dev/null
+	for dev in /dev/sr* /dev/sd* /dev/vd* /dev/nvme*n* /dev/mmcblk*; do
+		[ -b "$dev" ] || continue
+		mount -o ro "$dev" /run/live/iso 2>/dev/null || continue
+		if [ -f /run/live/iso/live/filesystem.squashfs ]; then
+			found=1
+			log "medium $dev"
+			break
+		fi
+		umount /run/live/iso 2>/dev/null
+	done
+	[ "$found" = 1 ] && break
+	i=$((i + 1))
+	sleep 1
+done
+
+if [ "$found" != 1 ]; then
+	log "Live-Medium nicht gefunden"
+	echo "Live-Medium nicht gefunden. Notfall-Shell."
+	exec /bin/sh
+fi
+
+if ! mount -t squashfs -o loop,ro /run/live/iso/live/filesystem.squashfs /run/live/lower; then
+	log "squashfs mount failed"
+	exec /bin/sh
+fi
+mount -t tmpfs -o mode=755 tmpfs /run/live/rw
+mkdir -p /run/live/rw/upper /run/live/rw/work
+if ! mount -t overlay overlay \
+	-o lowerdir=/run/live/lower,upperdir=/run/live/rw/upper,workdir=/run/live/rw/work \
+	/newroot; then
+	log "overlay mount failed"
+	exec /bin/sh
+fi
+
+mkdir -p /newroot/run/live/iso /newroot/run/live/lower /newroot/run/live/rw \
+	/newroot/proc /newroot/sys /newroot/dev
+mount --move /run/live/iso /newroot/run/live/iso || log "move iso failed"
+mount --move /run/live/lower /newroot/run/live/lower || log "move lower failed"
+mount --move /run/live/rw /newroot/run/live/rw || log "move rw failed"
+mount --move /sys /newroot/sys
+mount --move /proc /newroot/proc
+mount --move /dev /newroot/dev
+
+exec switch_root /newroot /sbin/init

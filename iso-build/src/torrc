@@ -1,0 +1,12 @@
+# Alpine XFCE live image — local Tor client, fail-closed.
+# This is a client only. It is not a relay and not an exit.
+User tor
+DataDirectory /var/lib/tor
+AvoidDiskWrites 1
+ClientUseIPv6 0
+SocksPort 127.0.0.1:9050
+TransPort 127.0.0.1:9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+DNSPort 127.0.0.1:53
+AutomapHostsOnResolve 1
+VirtualAddrNetworkIPv4 10.192.0.0/10
+Log notice file /var/log/tor/notices.log

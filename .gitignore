@@ -1,0 +1,13 @@
+# Alpine chroot, SDK and image output (binaries; GitHub rejects files > 100 MB)
+iso-build/rootfs/
+iso-build/sdk/
+iso-build/out/
+iso-build/*.tar.gz
+
+# App-builder sandbox, not part of this image
+node_modules/
+.grok/
+artifacts/
+screenshots/
+.cache/
+*.log

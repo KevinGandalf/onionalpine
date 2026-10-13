@@ -1,0 +1,56 @@
+Alpine XFCE + Tor  —  Live-USB (UEFI)
+======================================
+
+Das ist ein live-fähiges Alpine Linux 3.24 mit XFCE.
+Nach dem Start läuft die grafische Oberfläche automatisch.
+
+Anmeldung, falls nötig:    live
+Passwort:                  live
+Administratorrechte:       doas   (ohne Passwort für den Benutzer live)
+
+Tastatur: Deutsch (QWERTZ). Alt+Shift schaltet auf US um.
+Zeitzone: Europe/Berlin.
+
+Tor
+---
+Tor startet automatisch. Der Browser (LibreWolf) ist fest auf den
+lokalen Tor-SOCKS (127.0.0.1:9050, DNS über Tor) eingestellt.
+Zusätzlich schickt eine Firewall fast den gesamten übrigen TCP-Verkehr
+durch Tor (transparent) und blockiert den Rest. IPv6 ist abgeschaltet.
+
+Erlaubt ausserhalb von Tor nur:
+  * DHCP (damit das Netz überhaupt startet)
+  * NTP (Uhrzeit, Tor braucht eine ungefähr richtige Uhr)
+
+Prüfen: im Browser https://check.torproject.org/ öffnen.
+Tor-Status:  nyx    oder    doas rc-service tor status
+
+Das ist NICHT Tails und NICHT der Tor Browser.
+LibreWolf über Tor ist deutlich privater als ein normaler Browser,
+aber nicht so stark gegen Fingerprinting gehärtet wie der echte
+Tor Browser. Es gibt keine MAC-Adress-Anonymität über den Start hinaus
+(die MAC wird beim Boot einmal zufällig gesetzt), keine sichere
+Amnesie über den RAM hinaus und keinen Schutz, wenn du den Stick
+danach als Datenträger benutzt. Für starke Anonymität nimm Tails.
+
+Netz
+----
+NetworkManager sitzt im Panel (WLAN und LAN).
+Ohne Netz kommt Tor nicht online — die Firewall lässt dann fast
+nichts hinaus. Das ist Absicht (fail-closed).
+
+Auf die Festplatte installieren
+-------------------------------
+Das System läuft nur aus dem RAM-Overlay über dem USB-Stick.
+Eine Installation auf die Platte ist möglich, aber nicht vorkonfiguriert
+(setup-alpine / setup-disk). Dabei die Tor-Firewall mitdenken.
+
+USB schreiben (UEFI, Secure Boot AUS)
+-------------------------------------
+Linux oder macOS, Stick als /dev/sdX (NICHT die Partition sdX1):
+
+  sudo dd if=alpine-xfce-tor-3.24.2-x86_64.iso of=/dev/sdX bs=4M status=progress conv=fsync
+
+Windows: Rufus im DD-Modus, oder balenaEtcher.
+Im Firmware-Setup: USB-Boot an, Secure Boot aus. Das Image ist nicht
+von Microsoft signiert und startet mit aktivem Secure Boot nicht.

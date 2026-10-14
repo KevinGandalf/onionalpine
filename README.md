@@ -10,11 +10,12 @@ Das ist nicht Tails und nicht der Tor Browser. Details für den Stick stehen in
 | | |
 |---|---|
 | Image | `alpine-xfce-tor-3.24.2-x86_64.iso` |
-| SHA256 | `f717103fd126c534e1d5d83e79a4aa733e2f706a2d6c43304a09cd98d1606563` |
+| SHA256 | `4192121b54b24ac1ecb80cc51a40d4b7141423740132b21af0093d51edf10d84` |
 | Anmeldung | `live` / `live` |
 | Rechte | `doas` ohne Passwort |
 | Tastatur | Deutsch, Alt+Shift auf US |
 | Zeitzone | Europe/Berlin |
+| VPN | WireGuard über das Desktop-Icon (`.conf` von Mullvad, Proton, IVPN, …) |
 
 Die ISO selbst liegt als [Release](https://github.com/KevinGandalf/onionalpine/releases)
 (GitHub nimmt keine Dateien über 100 MB ins Git). Secure Boot muss aus sein.

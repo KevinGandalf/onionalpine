@@ -58,7 +58,10 @@ musl-locales
 nano
 network-manager-applet
 networkmanager
+networkmanager-cli
 networkmanager-wifi
+wireguard-tools
+yad
 ntfs-3g
 nyx
 pciutils

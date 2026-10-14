@@ -8,6 +8,10 @@ install -m 0644 "$SRC/torrc" "$ROOT/etc/tor/torrc"
 mkdir -p "$ROOT/etc/iptables"
 install -m 0644 "$SRC/rules-save" "$ROOT/etc/iptables/rules-save"
 install -m 0644 "$SRC/rules6-save" "$ROOT/etc/iptables/rules6-save"
+install -D -m 0755 "$SRC/wireguard-gui" "$ROOT/usr/local/bin/wireguard-gui"
+install -D -m 0755 "$SRC/wg-group.sh" "$ROOT/etc/NetworkManager/dispatcher.d/10-wg-group"
+install -D -m 0644 "$SRC/wireguard.desktop" "$ROOT/usr/share/applications/wireguard.desktop"
+grep -qx 'wireguard' "$ROOT/etc/modules" || printf '%s\n' 'wireguard' >> "$ROOT/etc/modules"
 
 cat > "$ROOT/etc/init.d/mac-randomize" << 'EOF'
 #!/sbin/openrc-run
@@ -66,6 +70,7 @@ plugins=keyfile
 dhcp=internal
 dns=none
 rc-manager=unmanaged
+auth-polkit=false
 
 [device]
 wifi.backend=wpa_supplicant
@@ -91,7 +96,8 @@ cat > "$ROOT/etc/motd" << 'EOF'
 Alpine XFCE + Tor (Live)
 
 Benutzer live, Passwort live.  doas für Root-Rechte.
-Browser geht über Tor.  Lies ~/Liesmich.txt
+Browser geht über Tor.  WireGuard: Symbol auf dem Desktop.
+Lies ~/Liesmich.txt
 EOF
 
 # LightDM autologin into XFCE
@@ -184,6 +190,7 @@ install -d -m 0755 /home/live/Desktop /home/live/.config/autostart
 '
 install -m 0644 "$SRC/Liesmich.txt" "$ROOT/home/live/Liesmich.txt"
 install -m 0644 "$SRC/Liesmich.txt" "$ROOT/home/live/Desktop/Liesmich.txt"
+install -m 0755 "$SRC/wireguard.desktop" "$ROOT/home/live/Desktop/wireguard.desktop"
 # desktop launcher
 python3 - << 'PY'
 from pathlib import Path

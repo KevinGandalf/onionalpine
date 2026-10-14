@@ -1,0 +1,80 @@
+#!/bin/sh
+# Desktop helper: import a WireGuard .conf into NetworkManager.
+# The browser stays on Tor. See Liesmich.txt.
+
+die() {
+	yad --center --title="WireGuard" --image=dialog-error \
+		--button="Schließen:0" --text="$1" >/dev/null 2>&1 || true
+	exit 1
+}
+
+nm() {
+	command nmcli "$@" 2>/dev/null || doas nmcli "$@"
+}
+
+import_conf() {
+	f=$(yad --center --file --title="WireGuard-Konfiguration wählen" \
+		--file-filter="WireGuard (*.conf) | *.conf" \
+		--file-filter="Alle Dateien | *" \
+		--width=640 --height=420) || return 0
+	[ -n "$f" ] || return 0
+	out=$(nmcli connection import type wireguard file "$f" 2>&1) || \
+		out=$(doas nmcli connection import type wireguard file "$f" 2>&1) || \
+		die "Import fehlgeschlagen:
+
+$out"
+	name=$(printf '%s\n' "$out" | sed -n "s/^Connection '\\(.*\\)' (.*/\\1/p" | head -1)
+	[ -n "$name" ] || die "Import unklar:
+
+$out"
+	nm connection modify "$name" \
+		wireguard.fwmark 51820 \
+		connection.autoconnect no \
+		ipv6.method disabled \
+		ipv4.ignore-auto-dns yes \
+		|| die "Tunnel importiert, Anpassung fehlgeschlagen ($name)."
+	nm connection modify "$name" ipv4.dns "" 2>/dev/null || true
+	yad --center --title="WireGuard" --image=dialog-information \
+		--button="Schließen:0" \
+		--text="Importiert: $name
+
+Einschalten: Netzwerk-Symbol in der Leiste anklicken und den Tunnel wählen.
+
+Der Browser bleibt über Tor. Ein voller Tunnel (AllowedIPs 0.0.0.0/0) legt sich darunter: das lokale Netz sieht VPN, nicht Tor. Andere Programme laufen dann durch den Tunnel und nicht durch Tor.
+
+DNS bleibt auf Tor. Interne VPN-Namen lösen sich deshalb nicht auf." >/dev/null
+}
+
+status() {
+	{
+		echo "Verbindungen"
+		echo "-------------"
+		nmcli -f NAME,TYPE,DEVICE connection show 2>&1 || true
+		echo
+		echo "WireGuard"
+		echo "---------"
+		wg show 2>&1 || true
+	} | yad --center --title="WireGuard-Status" --text-info \
+		--width=680 --height=420 --fontname=monospace \
+		--button="Schließen:0" >/dev/null
+}
+
+while true; do
+	yad --center --width=500 --title="WireGuard" \
+		--image=network-vpn \
+		--text="WireGuard-Client
+
+Mullvad, Proton VPN, IVPN und andere: .conf aus dem Konto importieren, dann in der Leiste einschalten.
+
+Die Mullvad-App und NordVPN laufen auf diesem System nicht. Mullvad geht über die WireGuard-Datei. NordVPN gibt keine solche Datei heraus." \
+		--button="Konfiguration importieren:10" \
+		--button="Verbindungen:11" \
+		--button="Status:12" \
+		--button="Schließen:1" >/dev/null
+	case $? in
+		10) import_conf ;;
+		11) nm-connection-editor >/dev/null 2>&1 & ;;
+		12) status ;;
+		*) exit 0 ;;
+	esac
+done

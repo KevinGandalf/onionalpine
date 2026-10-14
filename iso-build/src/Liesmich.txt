@@ -39,6 +39,24 @@ NetworkManager sitzt im Panel (WLAN und LAN).
 Ohne Netz kommt Tor nicht online — die Firewall lässt dann fast
 nichts hinaus. Das ist Absicht (fail-closed).
 
+WireGuard
+---------
+Desktop-Icon „WireGuard“: eine .conf-Datei importieren
+(Mullvad, Proton VPN, IVPN und jeder andere Anbieter, der eine
+WireGuard-Datei herausgibt). Danach im Netzwerk-Symbol der Leiste
+einschalten.
+
+Der Browser bleibt fest auf Tor. Ein voller Tunnel
+(AllowedIPs 0.0.0.0/0) legt sich darunter: das lokale Netz sieht
+dann VPN, nicht Tor. Andere Programme laufen in dem Fall durch den
+Tunnel und nicht durch Tor. Ohne Tunnel gilt wieder: TCP nur über Tor.
+DNS bleibt auf Tor, interne VPN-Namen lösen sich deshalb nicht auf.
+
+Die Mullvad-App und NordVPN gibt es hier nicht. Beide sind nur als
+Debian-/RPM-Programm gebaut und brauchen glibc. Mullvad funktioniert
+über die WireGuard-Datei aus dem Mullvad-Konto. NordVPN gibt keine
+solche Datei heraus, die App startet auf Alpine nicht.
+
 Auf die Festplatte installieren
 -------------------------------
 Das System läuft nur aus dem RAM-Overlay über dem USB-Stick.

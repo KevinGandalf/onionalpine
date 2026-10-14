@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=WireGuard
+GenericName=VPN
+Comment=WireGuard-Tunnel importieren oder bearbeiten
+Exec=wireguard-gui
+Icon=nm-vpn-standalone-lock-symbolic
+Terminal=false
+Categories=Network;
+StartupNotify=true

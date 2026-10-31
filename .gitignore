@@ -11,3 +11,9 @@ artifacts/
 screenshots/
 .cache/
 *.log
+
+# Tor-Box: eigene VPN-Zugangsdaten und Downloads nie einchecken
+tor-box/vpn/*
+!tor-box/vpn/HIER-VPN-DATEI-ABLEGEN.txt
+tor-box/downloads/*
+!tor-box/downloads/.keep

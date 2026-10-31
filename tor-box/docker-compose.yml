@@ -1,0 +1,25 @@
+services:
+  tor-box:
+    build: .
+    image: tor-box:latest
+    container_name: tor-box
+    # Nur vom eigenen Rechner erreichbar, nicht aus dem Netzwerk
+    ports:
+      - "127.0.0.1:6080:6080"
+    # Für WireGuard/OpenVPN und den Killswitch
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv6.conf.default.disable_ipv6=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    shm_size: "2gb"
+    environment:
+      # 1 = Browser bleibt offline, solange kein VPN läuft
+      REQUIRE_VPN: "0"
+    volumes:
+      - ./vpn:/vpn:ro
+      - ./downloads:/home/app/Downloads
+    restart: "no"

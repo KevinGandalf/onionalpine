@@ -1,0 +1,26 @@
+#!/bin/sh
+# Bereitet eine WireGuard-Datei für den Container vor:
+# - entfernt DNS, Table, SaveConfig und alle Pre/Post-Up/Down-Befehle
+# - streicht IPv6-Einträge aus Address und AllowedIPs (IPv6 ist abgeschaltet)
+# - entfernt Windows-Zeilenenden
+exec awk '
+{
+	sub(/\r$/, "")
+	line = $0
+	low = tolower(line)
+	if (low ~ /^[ \t]*(dns|table|saveconfig|preup|postup|predown|postdown)[ \t]*=/) next
+	if (low ~ /^[ \t]*(address|allowedips)[ \t]*=/) {
+		key = substr(line, 1, index(line, "=") - 1)
+		gsub(/[ \t]/, "", key)
+		n = split(substr(line, index(line, "=") + 1), parts, ",")
+		out = ""
+		for (i = 1; i <= n; i++) {
+			p = parts[i]
+			gsub(/[ \t]/, "", p)
+			if (p != "" && p !~ /:/) out = out (out == "" ? "" : ", ") p
+		}
+		if (out != "") print key " = " out
+		next
+	}
+	print line
+}' "$1"

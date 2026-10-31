@@ -1,0 +1,19 @@
+#!/bin/sh
+# OpenVPN --up: vom Server gepushte IPv4-DNS-Server nach /etc/resolv.conf schreiben.
+dns=""
+i=1
+while :; do
+	eval "opt=\${foreign_option_$i:-}"
+	[ -n "$opt" ] || break
+	case "$opt" in
+		"dhcp-option DNS "*)
+			d=${opt#dhcp-option DNS }
+			case "$d" in *:*) ;; *) dns="$dns $d" ;; esac
+			;;
+	esac
+	i=$((i + 1))
+done
+if [ -n "$dns" ]; then
+	for d in $dns; do echo "nameserver $d"; done > /etc/resolv.conf
+fi
+exit 0

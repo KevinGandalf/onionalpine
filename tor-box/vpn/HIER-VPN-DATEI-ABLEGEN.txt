@@ -1,0 +1,9 @@
+Hier genau EINE VPN-Datei ablegen (oder keine, dann geht Tor direkt raus):
+
+  WireGuard:  irgendwas.conf   (z. B. aus dem Mullvad- oder Proton-Konto)
+  OpenVPN:    irgendwas.ovpn
+
+Braucht OpenVPN Benutzername und Passwort, zusätzlich eine Datei auth.txt
+anlegen: erste Zeile Benutzername, zweite Zeile Passwort.
+
+Danach die Tor-Box neu starten (Stop, dann Start).
